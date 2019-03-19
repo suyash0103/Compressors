@@ -1,7 +1,9 @@
 #include<iostream>
 #include<fstream>
-#include <map>
+#include <unordered_map>
 #include<vector>
+#include <ctime>
+
 
 using namespace std;
 
@@ -26,8 +28,8 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
 
     //mapping characters of length 1
     int map_size = 4096;
-    map<string, int> encodetable;
-    vector <string> decodetable;
+    unordered_map<string, int> encodetable;
+    vector<string> decodetable;
     int map_current = 255;
     for (int i = 0; i < 256; i++) {
         decodetable.push_back(std::string(1, i));
@@ -64,7 +66,7 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
     if (buf.buffer != 0)write_buffer(buf, o, 0);
 
     //writing codebook to file
-    int size = 0;
+    long int size = 0;
     char null = 0;
     ofstream codebook(codefile, ios::out);
     for (int i = 256; i < decodetable.size(); i++) {
@@ -80,9 +82,13 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
 }
 
 int main(int argc, char *argv[]) {
-    if(argc!=4){
-        cout<<"Correct usage: ./a.out ipfile opfile codebook";
+    if (argc != 4) {
+        cout << "Correct usage: ./a.out ipfile opfile codebook";
         exit(0);
     }
+    long int start_s = clock();
     lzwEncode(argv[1], argv[2], argv[3]);
+    long int stop_s = clock();
+    cout << "time taken: " << (stop_s - start_s) / double(CLOCKS_PER_SEC) * 1000 << "ms" << endl;
+
 }

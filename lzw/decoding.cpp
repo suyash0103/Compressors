@@ -2,10 +2,15 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include<ctime>
 
 using namespace std;
 
-void lzwDecode(ifstream &i, ostream &o, ifstream &codefile) {
+void lzwDecode(char ipfile[], char opfile[], char file[]) {
+    ifstream i(ipfile, ios::binary);
+    ofstream o(opfile, ios::out | ios::trunc);
+    ifstream codefile(file, ios::in);
+
     vector <string> codebook;
     for (int i = 0; i < 256; i++) {
         codebook.push_back(std::string(1, i) = i);
@@ -34,6 +39,9 @@ void lzwDecode(ifstream &i, ostream &o, ifstream &codefile) {
         if (toRestore)
             o << codebook[toRestore];
     }
+    o.close();
+    i.close();
+    codefile.close();
 }
 
 int main(int argc, char *argv[]) {
@@ -41,13 +49,12 @@ int main(int argc, char *argv[]) {
         cout<<"Correct usage: ./a.out ipfile opfile codebook";
         exit(0);
     }
-    ifstream i(argv[1], ios::binary);
-    ofstream o(argv[2], ios::out | ios::trunc);
-    ifstream codefile(argv[3], ios::in);
-    lzwDecode(i, o, codefile);
+
+    int start_s=clock();
+    lzwDecode(argv[1],argv[2],argv[3]);
+    int stop_s=clock();
+    cout << "time taken: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 <<"ms"<< endl;
     cout << "DecodedToFile:" << argv[2] << endl;
-    o.close();
-    i.close();
-    codefile.close();
+
     return 0;
 }
