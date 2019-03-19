@@ -80,5 +80,9 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
 }
 
 int main(int argc, char *argv[]) {
+    if(argc!=4){
+        cout<<"Correct usage: ./a.out ipfile opfile codebook";
+        exit(0);
+    }
     lzwEncode(argv[1], argv[2], argv[3]);
 }

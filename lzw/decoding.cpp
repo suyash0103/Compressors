@@ -37,6 +37,10 @@ void lzwDecode(ifstream &i, ostream &o, ifstream &codefile) {
 }
 
 int main(int argc, char *argv[]) {
+    if(argc!=4){
+        cout<<"Correct usage: ./a.out ipfile opfile codebook";
+        exit(0);
+    }
     ifstream i(argv[1], ios::binary);
     ofstream o(argv[2], ios::out | ios::trunc);
     ifstream codefile(argv[3], ios::in);
