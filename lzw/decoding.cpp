@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include<ctime>
+#include <ctime>
 
 using namespace std;
 
@@ -12,6 +12,7 @@ void lzwDecode(char ipfile[], char opfile[], char file[]) {
     ifstream codefile(file, ios::in);
 
     vector <string> codebook;
+    codebook.reserve(4096);
     for (int i = 0; i < 256; i++) {
         codebook.push_back(std::string(1, i) = i);
     }
@@ -24,7 +25,7 @@ void lzwDecode(char ipfile[], char opfile[], char file[]) {
             codebook.push_back(present);
             present.clear();
         } else {
-            present = present + c;
+            present+=c;
         }
     }
 
@@ -50,9 +51,9 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    int start_s=clock();
+    long long int start_s=clock();
     lzwDecode(argv[1],argv[2],argv[3]);
-    int stop_s=clock();
+    long long int stop_s=clock();
     cout << "time taken: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 <<"ms"<< endl;
     cout << "DecodedToFile:" << argv[2] << endl;
 

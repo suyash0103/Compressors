@@ -1,8 +1,8 @@
 #include<iostream>
 #include<fstream>
-#include <unordered_map>
+#include<unordered_map>
 #include<vector>
-#include <ctime>
+#include<ctime>
 
 
 using namespace std;
@@ -30,6 +30,7 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
     int map_size = 4096;
     unordered_map<string, int> encodetable;
     vector<string> decodetable;
+    decodetable.reserve(4096);
     int map_current = 255;
     for (int i = 0; i < 256; i++) {
         decodetable.push_back(std::string(1, i));
@@ -47,7 +48,7 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
         noofcharinput++;
         fin.get(c);
         if (encodetable.find(present + c) != encodetable.end()) {
-            present = present + c;
+            present += c;
         } else if (map_current < 4096) {
             noofcharoutput++;
             map_current++;
