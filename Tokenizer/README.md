@@ -1,10 +1,10 @@
 # Tokenizer
-# Compile
+## Compile
 `g++ main.cpp -o tokenizer` <br/>
-# Run
+## Run
 ~~~~bash
 # example
 ./tokenizer inputfile outputfile
 ~~~~
-# Output
+## Output
 Gives null separated words and special character

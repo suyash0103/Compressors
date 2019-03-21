@@ -1,10 +1,8 @@
-# Compressors
-Compression algorithms
-## LZW
-### Compile
+# LZW
+## Compile
 `g++ encoding.cpp -o encoding` <br/>
 `g++ decoding.cpp -o decoding`
-### Run
+## Run
 ~~~~bash
 # encode
 ./encoding ipfile encodedopfile codebook

@@ -22,17 +22,23 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
     }
 
     int toRestore = 0;
+    string s;
     while (fin.read((char *) &toRestore, 4)) {
         if(toRestore>>18){ //check 19th bit
             toRestore=toRestore ^ (1<<18);
-            cout<<table[toRestore]<<endl;
-            o<<table[toRestore];
-//            cout<<"19 bit"<<toRestore<<endl;
+            if(toRestore & (1<<17)){
+                toRestore=toRestore ^ (1<<17);
+                s=table[toRestore];
+                s[0]=toupper(s[0]);
+                o<<s;
+            }else{
+                o<<table[toRestore];
+            }
+            //cout<<"19 bit"<<toRestore<<endl;
         }else{
             toRestore=toRestore ^ (1<<8);
-            cout<<(char)toRestore<<endl;
             o<<(char)toRestore;
-//            cout<<"8 bit"<<toRestore<<endl;
+            //cout<<"8 bit"<<toRestore<<endl;
         }
         toRestore = 0;
     }
