@@ -18,8 +18,7 @@ int main(int argc, char *argv[]) {
 
     string p;
     p.clear();
-    while (!i.eof()) {
-        i.get(c);
+    while (i.get(c)) {
         if (isalpha(c)) {
             p += c;
         } else {
@@ -32,7 +31,9 @@ int main(int argc, char *argv[]) {
             o.write((char *) &delimiter, sizeof(delimiter));
         }
     }
-
+    if(p.length()!=0){
+        o << p;o.write((char *) &delimiter, sizeof(delimiter));
+    }
     i.close();
     o.close();
     return 0;
