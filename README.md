@@ -18,9 +18,6 @@ diff ipfile opfile
 ~~~~
 
 ## LZW
-### Compile
-`g++ encoding.cpp -o encoding` <br/>
-`g++ decoding.cpp -o decoding`
 ### Run
 ~~~~bash
 # encode
