@@ -6,6 +6,7 @@
 #include <ctime>
 #include <chrono>
 
+
 using namespace std::chrono;
 using namespace std;
 
@@ -85,11 +86,11 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
             if(code==0)continue;
             if(code & (1<<17)){
                 code=code ^ (1<<17);
-                s=table[code];
+                s=table[code-1];
                 s[0]=toupper(s[0]);
                 o<<s;
             }else{
-                o<<table[code];
+                o<<table[code-1];
             }
         }else{
             if (buff_read(&buff, &code,8, 0) == 0) {
