@@ -6,15 +6,14 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    ifstream i(argv[1], ios::in);
-    ofstream o(argv[2], ios::out);
-    char c, delimiter;
-    delimiter = 0;
-
     if (argc < 3) {
         cout << "Correct usage: ./a.out ipfile opfile";
         exit(0);
     }
+    ifstream i(argv[1], ios::in);
+    ofstream o(argv[2], ios::out);
+    char c, delimiter;
+    delimiter = 0;
 
     string p;
     p.clear();

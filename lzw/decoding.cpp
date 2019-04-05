@@ -33,12 +33,16 @@ void lzwDecode(char ipfile[], char opfile[], char file[]) {
     while (!i.eof()) {
         toRestore = 0;
         i.read((char *) &toRestore, 3);
-        if (toRestore >> 12)
+        if (toRestore >> 12) {
             o << codebook[toRestore >> 12];
+            //cout<<codebook[(toRestore>>12)]<<" "<<(toRestore>>12)<<endl;
+        }
         int hex = 0xFFF;
         toRestore = (toRestore & hex);
-        if (toRestore)
+        if (toRestore){
             o << codebook[toRestore];
+            //cout<<codebook[toRestore]<<" "<<toRestore<<endl;
+        }
     }
     o.close();
     i.close();

@@ -40,10 +40,12 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
     string p;
     char c;
     short int capital = 0;
+    int count=0;
 
     while (fin.get(c)) {
         if (c == 0) {
             if (table.find(p) != table.end()) {
+                count++;
                 write_buffer(o, table[p], 19, capital);
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char)toupper(p[0]);
@@ -67,7 +69,7 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
         }
     }
 
-
+    cout<<"number of words used from dictionary"<<count;
     fin.close();
     o.close();
     codefile.close();

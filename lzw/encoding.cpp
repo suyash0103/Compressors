@@ -44,12 +44,11 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
     if (!fin.eof()) fin.get(p);
     string present;
     present = p;
-    while (!fin.eof()) {
+    while (fin.get(c)) {
         noofcharinput++;
-        fin.get(c);
         if (encodetable.find(present + c) != encodetable.end()) {
             present += c;
-        } else if (map_current < 4096) {
+        } else if (map_current <= 4094) {
             noofcharoutput++;
             map_current++;
             //cout<<present<<" "<<encodetable[present]<<endl; //output
@@ -63,6 +62,9 @@ void lzwEncode(char ipfile[], char opfile[], char codefile[]) {
             write_buffer(buf, o, encodetable[present]);
             present = c;
         }
+    }
+    if(present.length()>0) {
+        write_buffer(buf, o, encodetable[present]);
     }
     if (buf.buffer != 0)write_buffer(buf, o, 0);
 
