@@ -7,6 +7,50 @@
 
 using namespace std;
 
+/**
+ * @brief Read data from buffer.
+ * buff_read @author srinskit
+ * Note that "code" should be read only when function returns 1. When 0 is
+ * returned, call the function again with next buffer to complete reading of
+ * "code".
+ *
+ * @param buff The pointer to the buffer to be read from.
+ * @param code The pointer to the variable receiving the data.
+ * @param code_len The length of data to be read in bits.
+ * @param flush Set to 1 to reset function.
+ * @return int -1 if error, 1 if success, 0 if function needs to be recalled
+ * with next buffer.
+ */
+int buff_read(uint64_t *buff, uint64_t *code, unsigned code_len, int flush) {
+    const unsigned buff_len = 8 * sizeof(*buff);
+    static unsigned filled_len = buff_len;
+    static unsigned to_read_len = 0;
+    if (code_len > buff_len) return -1;
+    if (flush) {
+        filled_len = buff_len;
+        to_read_len = 0;
+        return 1;
+    }
+    if (to_read_len != 0) {
+        *code <<= to_read_len;
+        *code += *buff >> (buff_len - to_read_len);
+        *buff <<= to_read_len;
+        filled_len -= to_read_len;
+        to_read_len = 0;
+        return 1;
+    }
+    if (code_len <= filled_len) {
+        *code = *buff >> (buff_len - code_len);
+        *buff <<= code_len;
+        filled_len -= code_len;
+        return 1;
+    }
+    to_read_len = code_len - filled_len;
+    *code = *buff >> (buff_len - filled_len);
+    filled_len = buff_len;
+    return 0;
+}
+
 void Decode(char ipfile[], char opfile[], char dictionary[]) {
     ifstream fin(ipfile, ios::binary);
     ofstream o(opfile, ios::out );
@@ -21,26 +65,38 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
         i++;
     }
 
-    int toRestore = 0;
     string s;
-    while (fin.read((char *) &toRestore, 4)) {
-        if(toRestore>>18){ //check 19th bit
-            toRestore=toRestore ^ (1<<18);
-            if(toRestore & (1<<17)){
-                toRestore=toRestore ^ (1<<17);
-                s=table[toRestore];
+    uint64_t buff = 0,code;
+    if (!fin.read((char *) &buff, sizeof(buff))) return;
+    while(1){
+        code=0;  //read first bit and find if its 19 bit or 9 bit encoding
+        if (buff_read(&buff, &code,1, 0) == 0) {
+            if (!fin.read((char *) &buff, sizeof(buff))) break;
+            buff_read(&buff, &code,1, 0);
+        }
+        if(code==1){
+            code=0;
+            if (buff_read(&buff, &code,18, 0) == 0) {
+                if (!fin.read((char *) &buff, sizeof(buff))) break;
+                buff_read(&buff, &code,18, 0);
+            }
+            if(code==0)continue;
+            if(code & (1<<17)){
+                code=code ^ (1<<17);
+                s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
             }else{
-                o<<table[toRestore];
+                o<<table[code];
             }
-            //cout<<"19 bit"<<toRestore<<endl;
         }else{
-            toRestore=toRestore ^ (1<<8);
-            o<<(char)toRestore;
-            //cout<<"8 bit"<<toRestore<<endl;
+            if (buff_read(&buff, &code,8, 0) == 0) {
+                if (!fin.read((char *) &buff, sizeof(buff))) break;
+                buff_read(&buff, &code,8, 0);
+            }
+            if(code==0)continue;
+            o<<(char)code;
         }
-        toRestore = 0;
     }
     o.close();
     fin.close();

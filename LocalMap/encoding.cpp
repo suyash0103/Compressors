@@ -2,23 +2,79 @@
 #include<fstream>
 #include<unordered_map>
 #include<string>
-#include <ctime>
+#include<ctime>
 
 using namespace std;
 
-void write_buffer(ofstream &o, int code, int bit_length, short int capital = 0) {
+/**
+ * @brief Write data into buffer.
+ * buff_read @author srinskit
+ * Note that when function returns 0, the function has to be recalled with new
+ * buffer.
+ *
+ * @param buff The pointer to the buffer to be written to.
+ * @param code The data to be written.
+ * @param code_len The length of data to be written in bits.
+ * @param flush Set to 1 to flush buffer and reset function.
+ * @return int -1 if error, 1 if success, 0 if function needs to be recalled
+ * with next buffer.
+ * @return int 1 if flush didn't modify buffer, 0 if flush modified buffer.
+ */
+int buff_write(uint64_t *buff, uint64_t code, unsigned code_len, int flush) {
+    const unsigned buff_len = 8 * sizeof(*buff);
+    static unsigned vacant_len = buff_len;
+    static unsigned to_write_len = 0;
+    if (code_len > buff_len) return -1;
+    if (flush) {
+        if (vacant_len == buff_len) return 0;
+        *buff <<= vacant_len;
+        int ret = buff_len - vacant_len;
+        vacant_len = buff_len;
+        to_write_len = 0;
+        return ret;
+    }
+    if (to_write_len != 0) {
+        *buff = code - ((code >> to_write_len) << to_write_len);
+        vacant_len -= to_write_len;
+        to_write_len = 0;
+        return 1;
+    }
+    if (code_len <= vacant_len) {
+        *buff <<= code_len;
+        *buff += code;
+        vacant_len -= code_len;
+        return 1;
+    }
+    to_write_len = code_len - vacant_len;
+    *buff <<= vacant_len;
+    *buff += code >> to_write_len;
+    vacant_len = buff_len;
+    return 0;
+}
+
+
+void prepare_buffer(uint64_t &buff, ofstream &o, int code_32, int bit_length, short int capital = 0) {
+    uint64_t code;
+    code = static_cast<uint64_t>(code_32);
     if (bit_length == 19) {
-        //cout << "19bit" << code << endl;
-        if (capital){
+        //for 19 bit code 1st bit is 1
+        if (capital) {
             code = code | (3 << 17);
+        } else code = code | (1 << 18);
+        //writing to file
+        if (buff_write(&buff, code, 19, 0) == 0) {
+            o.write((char *) &buff, sizeof(buff));
+            buff = 0;
+            buff_write(&buff, code, 19, 0);
         }
-        else code = code | (1 << 18);
-        o.write((char *) &code, sizeof(code));
     }
     if (bit_length == 9) {
-        //cout << "8bit" << code << endl;
-        code = code | (1 << 8);
-        o.write((char *) &code, sizeof(code));
+        //for 9 bit code 9th bit is 0
+        if (buff_write(&buff, code, 9, 0) == 0) {
+            o.write((char *) &buff, sizeof(buff));
+            buff = 0;
+            buff_write(&buff, code, 9, 0);
+        }
     }
 }
 
@@ -40,17 +96,18 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
     string p;
     char c;
     short int capital = 0;
-    int count=0;
+    int count = 0;
+    uint64_t buff = 0;
 
     while (fin.get(c)) {
         if (c == 0) {
             if (table.find(p) != table.end()) {
                 count++;
-                write_buffer(o, table[p], 19, capital);
+                prepare_buffer(buff, o, table[p], 19, capital);
             } else if (p.length() >= 1) {
-                if (capital)p[0] = (char)toupper(p[0]);
+                if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
-                    write_buffer(o, int(p[i]), 9);
+                    prepare_buffer(buff, o, int(p[i]), 9);
                 }
             }
             capital = 0;
@@ -59,7 +116,7 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             if (p.length() == 0) {
                 if (isalpha(c) && isupper(c)) { //if first letter is uppercase convert
                     capital = 1;
-                    p += (char)tolower(c);
+                    p += (char) tolower(c);
                 } else {
                     p += c;
                 }
@@ -69,7 +126,10 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
         }
     }
 
-    cout<<"number of words used from dictionary"<<count;
+    if (buff_write(&buff, 0, 0, 1) != 0)
+        o.write((char *) &buff, sizeof(buff));
+
+    cout << "number of words used from dictionary " << count << "\n";
     fin.close();
     o.close();
     codefile.close();
