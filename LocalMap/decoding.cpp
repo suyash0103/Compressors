@@ -55,7 +55,7 @@ int buff_read(uint64_t *buff, uint64_t *code, unsigned code_len, int flush) {
 
 void Decode(char ipfile[], char opfile[], char dictionary[]) {
     ifstream fin(ipfile, ios::binary);
-    ofstream o(opfile, ios::out );
+    ofstream o(opfile, ios::binary );
     ifstream codefile(dictionary, ios::in);
 
     vector<string> table;
@@ -83,26 +83,27 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
                 buff_read(&buff, &code,18, 0);
             }
 
-            if(code==0)continue;
+            if(code==0){cout<<"null break"<<endl;break;}
             if(code & (1<<17)){
                 //cout<<code<<":"<<(code ^ (1<<17))<<endl;
                 code=code ^ (1<<17);
-                if(code > 58109){
-                    cout<<"read error1\n";
+                if(code > 58681){
+                    cout<<"\t\t\t\tread error1\n";
+                    //cerr<<"hellooooo\n";
                     continue;
                 }
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
-                cout<<"\n"<<s<<" "<<code<<"\n";
+                //cout<<"\n"<<s<<" "<<code<<"\n";
             }else{
-                if(code > 58109){
+                if(code > 58681){
                     cout<<"read error\n";
                     continue;
                 }
                 s=table[code];
                 o<<s;
-                cout<<"\n"<<s<<" "<<code<<"\n";
+                //cout<<"\n"<<s<<" "<<code<<"\n";
             }
         }else{
             code=0;
@@ -110,9 +111,9 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
                 if (!fin.read((char *) &buff, sizeof(buff))) break;
                 buff_read(&buff, &code,8, 0);
             }
-            if(code==0)continue;
+            if(code==0){cout<<"null break"<<endl;break;}
             o<<(char)code;
-            //cout<<(char)code<<": "<<code<<"     ";
+            //cout<<(char)code<<":"<<code<<endl;
         }
     }
     o.close();

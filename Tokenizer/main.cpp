@@ -2,6 +2,7 @@
 #include<fstream>
 #include<string>
 #include<string.h>
+#include <limits.h>
 
 using namespace std;
 
@@ -10,15 +11,17 @@ int main(int argc, char *argv[]) {
         cout << "Correct usage: ./a.out ipfile opfile";
         exit(0);
     }
-    ifstream i(argv[1], ios::in);
-    ofstream o(argv[2], ios::out);
+
+    ifstream i(argv[1], ios::binary);
+    ofstream o(argv[2], ios::binary);
     char c, delimiter;
     delimiter = 0;
     int tokens=0,words=0;
 
     string p;
     p.clear();
-    while (i.get(c)) {
+    while (i.read(&c,sizeof(c))) {
+        //cout<<int(c);
         if (isalpha(c)) {
             p += c;
         } else {

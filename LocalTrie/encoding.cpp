@@ -150,6 +150,7 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
     string p;
     char c;
     short int capital = 0;
+    unsigned char temp;
     uint16_t id=0;
     int count = 0;
     uint64_t buff = 0;
@@ -165,7 +166,8 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
-                    prepare_buffer(buff, o, int(p[i]), 9);
+                    temp=int(p[i]);
+                    prepare_buffer(buff, o, temp, 9);
                 }
             }
             capital = 0;
