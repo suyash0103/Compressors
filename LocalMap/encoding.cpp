@@ -61,6 +61,7 @@ void prepare_buffer(uint64_t &buff, ofstream &o, int code_32, int bit_length, sh
     if (bit_length == 19) {
         //for 19 bit code 1st bit is 1
         if (capital) {
+            //cout<<code<<":"<<(code|(1<<17))<<endl;
             code = code | (3 << 17);
         } else code = code | (1 << 18);
         //writing to file
@@ -106,10 +107,12 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             if (table.find(p) != table.end()) {
                 count++;
                 prepare_buffer(buff, o, table[p], 19, capital);
+                cout<<endl<<p<<" "<<table[p]<<endl;
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
                     prepare_buffer(buff, o, int(p[i]), 9);
+                    //cout<<p[i]<<" "<<int(p[i])<<";      ";
                 }
             }
             capital = 0;

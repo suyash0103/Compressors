@@ -117,6 +117,7 @@ void insert(struct TrieNode *root, string key,uint16_t id) {
 
 // Returns the id of node
 uint16_t search(struct TrieNode *root, string key) {
+    if(!isalpha(key[0]))  return 0;
     struct TrieNode *pCrawl = root;
 
     for (int i = 0; i < key.length(); i++) {
@@ -155,11 +156,12 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
 
     while (fin.get(c)) {
         if (c == 0) {
+            //cout<<p<<"\n";
             id=search(trie,p);
-            //cout<<p<<" "<<id<<endl;
+            //cout<<id<<endl;
             if (id != 0) {
                 count++;
-                prepare_buffer(buff, o, id, 19, capital);
+                prepare_buffer(buff, o, id-1, 19, capital);
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
