@@ -86,18 +86,10 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
             if(code==0)continue;
             if(code & (1<<17)){
                 code=code ^ (1<<17);
-                if(code > 58109){
-                    cout<<"read error1\n";
-                    continue;
-                }
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
             }else{
-                if(code > 58109){
-                    cout<<"read error1\n";
-                    continue;
-                }
                 o<<table[code];
             }
         }else{

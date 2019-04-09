@@ -100,13 +100,12 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
     string p;
     char c;
     unsigned char temp;
-    int prevflag=0;
     short int capital = 0;
     int count = 0;
     uint64_t buff = 0;
 
     while (fin.get(c)) {
-        if (c == 0 && prevflag!=1) {
+        if (c == 0) {
             if (table.find(p) != table.end()) {
                 count++;
                 prepare_buffer(buff, o, table[p], 19, capital);
@@ -121,11 +120,8 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             }
             capital = 0;
             p.clear();
-            prevflag=1;
-        } else if(c == 0 && prevflag==1){
-            prepare_buffer(buff, o, 0, 9);
-            cout<<"null"<<endl;
-        }else
+        }
+        else
         {
             if (p.length() == 0) {
                 if (isalpha(c) && isupper(c)) { //if first letter is uppercase convert
@@ -137,7 +133,6 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             } else {
                 p += c;
             }
-            prevflag=0;
         }
     }
 

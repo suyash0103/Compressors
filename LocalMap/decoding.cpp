@@ -83,24 +83,15 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
                 buff_read(&buff, &code,18, 0);
             }
 
-            if(code==0){cout<<"null break"<<endl;break;}
+            if(code==0){break;}
             if(code & (1<<17)){
                 //cout<<code<<":"<<(code ^ (1<<17))<<endl;
                 code=code ^ (1<<17);
-                if(code > 58681){
-                    cout<<"\t\t\t\tread error1\n";
-                    //cerr<<"hellooooo\n";
-                    continue;
-                }
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
                 //cout<<"\n"<<s<<" "<<code<<"\n";
             }else{
-                if(code > 58681){
-                    cout<<"read error\n";
-                    continue;
-                }
                 s=table[code];
                 o<<s;
                 //cout<<"\n"<<s<<" "<<code<<"\n";
@@ -111,7 +102,7 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
                 if (!fin.read((char *) &buff, sizeof(buff))) break;
                 buff_read(&buff, &code,8, 0);
             }
-            if(code==0){cout<<"null break"<<endl;break;}
+            if(code==0){break;}
             o<<(char)code;
             //cout<<(char)code<<":"<<code<<endl;
         }
