@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     p.clear();
     while (i.read(&c,sizeof(c))) {
         //cout<<int(c);
-        if (isalpha(c)) {
+        if (isalpha(c) || (c=='<') || (c=='/' && p.length()!=0 && p[0]=='<') || (c=='>' && p.length()!=0 && p[0]=='<')) {
             p += c;
         } else {
             if (p.length() != 0) {

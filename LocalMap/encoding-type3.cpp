@@ -3,7 +3,7 @@
 #include<unordered_map>
 #include<string>
 #include<ctime>
-#include <chrono>
+#include<chrono>
 
 using namespace std::chrono;
 using namespace std;
@@ -55,36 +55,32 @@ int buff_write(uint64_t *buff, uint64_t code, unsigned code_len, int flush) {
 }
 
 
-void prepare_buffer(uint64_t &buff, ofstream &o, int code_32, int bit_length, short int capital = 0) {
-    uint64_t code;
-    code = static_cast<uint64_t>(code_32);
-    //cout<<code<<":"<<code_32<<endl;
-    if (bit_length == 19) {
-        //for 19 bit code 1st bit is 1
+void prepare_buffer(uint64_t &buff, ofstream &o, ofstream &o2, int code_32, int bit_length, short int capital = 0) {
+    uint64_t code=code_32;
+    char delimiter=-125;
+    if (bit_length == 18) {
+        //for 18 bit code 1st bit is 1
         if (capital) {
-            //cout<<code<<":"<<(code|(1<<17))<<endl;
-            code = code | (3 << 17);
-        } else code = code | (1 << 18);
+            code = code | (1 << 17);
+        }
         //writing to file
-        if (buff_write(&buff, code, 19, 0) == 0) {
+        o2.write(&delimiter, sizeof(delimiter));
+        if (buff_write(&buff, code, 18, 0) == 0) {
             o.write((char *) &buff, sizeof(buff));
             buff = 0;
-            buff_write(&buff, code, 19, 0);
+            buff_write(&buff, code, 18, 0);
         }
     }
-    if (bit_length == 9) {
+    if (bit_length == 8) {
         //for 9 bit code 9th bit is 0
-        if (buff_write(&buff, code, 9, 0) == 0) {
-            o.write((char *) &buff, sizeof(buff));
-            buff = 0;
-            buff_write(&buff, code, 9, 0);
-        }
+        o2.write((char*)&code,sizeof(char));
     }
 }
 
-void Encode(char ipfile[], char opfile[], char dictionary[]) {
+void Encode(char ipfile[], char opfile[], char opfile2[], char dictionary[]) {
     ifstream fin(ipfile, ios::binary);
     ofstream o(opfile, ios::binary);
+    ofstream o2(opfile2, ios::binary);
     ifstream codefile(dictionary, ios::in);
 
     unordered_map<string, int> table;
@@ -108,13 +104,13 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
         if (c == 0) {
             if (table.find(p) != table.end()) {
                 count++;
-                prepare_buffer(buff, o, table[p], 19, capital);
-//                cout<<" "<<table[p];
+                prepare_buffer(buff, o, o2, table[p], 18, capital);
+                //cout<<" "<<p;
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
                     temp=int(p[i]);
-                    prepare_buffer(buff, o, temp, 9);
+                    prepare_buffer(buff, o, o2, temp, 8);
                     //cout<<p[i]<<" "<<int(p[i])<<endl;
                 }
             }
@@ -142,16 +138,17 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
     cout << "number of words used from dictionary " << count << "\n";
     fin.close();
     o.close();
+    o2.close();
     codefile.close();
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        cout << "Correct usage: ./a.out tokens opfile dictionary";
+    if (argc != 5) {
+        cout << "Correct usage: ./a.out tokens opfile1 opfile2 dictionary";
         exit(0);
     }
     auto start = high_resolution_clock::now();
-    Encode(argv[1], argv[2], argv[3]);
+    Encode(argv[1], argv[2], argv[3], argv[4]);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by function: "<< duration.count() << " microseconds" << endl;

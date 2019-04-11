@@ -3,7 +3,9 @@
 #include <vector>
 #include <string>
 #include <ctime>
+#include <chrono>
 
+using namespace std::chrono;
 using namespace std;
 
 void lzwDecode(char ipfile[], char opfile[], char file[]) {
@@ -33,12 +35,16 @@ void lzwDecode(char ipfile[], char opfile[], char file[]) {
     while (!i.eof()) {
         toRestore = 0;
         i.read((char *) &toRestore, 3);
-        if (toRestore >> 12)
+        if (toRestore >> 12) {
             o << codebook[toRestore >> 12];
+            //cout<<codebook[(toRestore>>12)]<<" "<<(toRestore>>12)<<endl;
+        }
         int hex = 0xFFF;
         toRestore = (toRestore & hex);
-        if (toRestore)
+        if (toRestore){
             o << codebook[toRestore];
+            //cout<<codebook[toRestore]<<" "<<toRestore<<endl;
+        }
     }
     o.close();
     i.close();
@@ -51,11 +57,11 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    long long int start_s=clock();
+    auto start = high_resolution_clock::now();
     lzwDecode(argv[1],argv[2],argv[3]);
-    long long int stop_s=clock();
-    cout << "time taken: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 <<"ms"<< endl;
-    cout << "DecodedToFile:" << argv[2] << endl;
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count() << " microseconds" << endl;
 
     return 0;
 }

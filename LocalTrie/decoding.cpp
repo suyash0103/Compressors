@@ -6,6 +6,7 @@
 #include <ctime>
 #include <chrono>
 
+
 using namespace std::chrono;
 using namespace std;
 
@@ -55,7 +56,7 @@ int buff_read(uint64_t *buff, uint64_t *code, unsigned code_len, int flush) {
 
 void Decode(char ipfile[], char opfile[], char dictionary[]) {
     ifstream fin(ipfile, ios::binary);
-    ofstream o(opfile, ios::binary );
+    ofstream o(opfile, ios::out );
     ifstream codefile(dictionary, ios::in);
 
     vector<string> table;
@@ -82,29 +83,22 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
                 if (!fin.read((char *) &buff, sizeof(buff))) break;
                 buff_read(&buff, &code,18, 0);
             }
-
-            if(code==0){break;}
+            if(code==0)continue;
             if(code & (1<<17)){
-                //cout<<code<<":"<<(code ^ (1<<17))<<endl;
                 code=code ^ (1<<17);
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
-                //cout<<"\n"<<s<<" "<<code<<"\n";
             }else{
-                s=table[code];
-                o<<s;
-                //cout<<"\n"<<s<<" "<<code<<"\n";
+                o<<table[code];
             }
         }else{
-            code=0;
             if (buff_read(&buff, &code,8, 0) == 0) {
                 if (!fin.read((char *) &buff, sizeof(buff))) break;
                 buff_read(&buff, &code,8, 0);
             }
-            if(code==0){break;}
+            if(code==0)continue;
             o<<(char)code;
-            //cout<<(char)code<<":"<<code<<endl;
         }
     }
     o.close();

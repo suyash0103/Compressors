@@ -72,11 +72,11 @@ void Decode(char ipfile[], char opfile[], char dictionary[]) {
     if (!fin.read((char *) &buff, sizeof(buff))) return;
     while(1){
         code=0;  //read first bit and find if its 19 bit or 9 bit encoding
-        if (buff_read(&buff, &code,1, 0) == 0) {
+        if (buff_read(&buff, &code,8, 0) == 0) {
             if (!fin.read((char *) &buff, sizeof(buff))) break;
-            buff_read(&buff, &code,1, 0);
+            buff_read(&buff, &code,8, 0);
         }
-        if(code==1){
+        if(code==-125){
             code=0;
             if (buff_read(&buff, &code,18, 0) == 0) {
                 if (!fin.read((char *) &buff, sizeof(buff))) break;
