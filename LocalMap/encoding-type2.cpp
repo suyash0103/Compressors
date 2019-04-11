@@ -3,7 +3,7 @@
 #include<unordered_map>
 #include<string>
 #include<ctime>
-#include <chrono>
+#include<chrono>
 
 using namespace std::chrono;
 using namespace std;
@@ -112,7 +112,7 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             if (table.find(p) != table.end()) {
                 count++;
                 prepare_buffer(buff, o, table[p], 18, capital);
-                //cout<<"Table "<<p<<" "<<table[p]<<endl;
+                //cout<<" "<<p;
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {

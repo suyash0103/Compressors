@@ -26,22 +26,16 @@ void Decode(char ipfile[], char ipfile1[], char opfile[], char dictionary[]) {
 
     string s;
     char c;
-    uint64_t buff = 0,code;
-    if (!fin.read((char *) &buff, sizeof(buff))) return;
+    uint64_t code;
     while(1){
-        //read first char and find if its 18 bit or 8 bit encoding
-        if (!fin2.read(&c, sizeof(c))){break;cout<<"readbreak\n";}
+        if (!fin.read(&c, sizeof(c))){break;}
 //        cout<<"char:"<<c<<endl;
-        if(c==-125){
+        if(c==-125 || c==-124){
             code=0;
-            if (buff_read(&buff, &code,18, 0) == 0) {
-                if (!fin.read((char *) &buff, sizeof(buff))) break;
-                buff_read(&buff, &code,18, 0);
-            }
+            if (!fin2.read((char *) &code, 2)) break;
+
             if(code==0){break;cout<<"break1\n";}
-            if(code & (1<<17)){
-                //cout<<code<<":"<<(code ^ (1<<17))<<endl;
-                code=code ^ (1<<17);
+            if(c==-124){
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;

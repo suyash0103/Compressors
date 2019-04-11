@@ -9,9 +9,8 @@
 using namespace std::chrono;
 using namespace std;
 
-void Decode(char ipfile[], char ipfile1[], char opfile[], char dictionary[]) {
+void Decode(char ipfile[], char opfile[], char dictionary[]) {
     ifstream fin(ipfile, ios::binary);
-    ifstream fin2(ipfile1,ios::binary);
     ofstream o(opfile, ios::binary );
     ifstream codefile(dictionary, ios::in);
 
@@ -26,22 +25,16 @@ void Decode(char ipfile[], char ipfile1[], char opfile[], char dictionary[]) {
 
     string s;
     char c;
-    uint64_t buff = 0,code;
-    if (!fin.read((char *) &buff, sizeof(buff))) return;
+    uint64_t code;
     while(1){
-        //read first char and find if its 18 bit or 8 bit encoding
-        if (!fin2.read(&c, sizeof(c))){break;cout<<"readbreak\n";}
+        if (!fin.read(&c, sizeof(c))){break;}
 //        cout<<"char:"<<c<<endl;
-        if(c==-125){
+        if(c==-125 || c==-124){
             code=0;
-            if (buff_read(&buff, &code,18, 0) == 0) {
-                if (!fin.read((char *) &buff, sizeof(buff))) break;
-                buff_read(&buff, &code,18, 0);
-            }
+            if (!fin.read((char *) &code, 2)) break;
+
             if(code==0){break;cout<<"break1\n";}
-            if(code & (1<<17)){
-                //cout<<code<<":"<<(code ^ (1<<17))<<endl;
-                code=code ^ (1<<17);
+            if(c==-124){
                 s=table[code];
                 s[0]=toupper(s[0]);
                 o<<s;
@@ -59,18 +52,17 @@ void Decode(char ipfile[], char ipfile1[], char opfile[], char dictionary[]) {
     }
     o.close();
     fin.close();
-    fin2.close();
     codefile.close();
 }
 
 int main(int argc, char *argv[]) {
-    if(argc!=5){
-        cout<<"Correct usage: ./a.out ipfile1 ipfile2 opfile codebook";
+    if(argc!=4){
+        cout<<"Correct usage: ./a.out ipfile opfile codebook";
         exit(0);
     }
 
     auto start = high_resolution_clock::now();
-    Decode(argv[1],argv[2],argv[3],argv[4]);
+    Decode(argv[1],argv[2],argv[3]);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by function: "<< duration.count() << " microseconds" << endl;

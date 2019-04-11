@@ -109,7 +109,7 @@ void Encode(char ipfile[], char opfile[], char dictionary[]) {
             if (table.find(p) != table.end()) {
                 count++;
                 prepare_buffer(buff, o, table[p], 19, capital);
-                //cout<<"Table "<<p<<" "<<table[p]<<endl;
+//                cout<<" "<<table[p];
             } else if (p.length() >= 1) {
                 if (capital)p[0] = (char) toupper(p[0]);
                 for (int i = 0; i < p.length(); i++) {
