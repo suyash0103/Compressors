@@ -1,15 +1,3 @@
-/**
- * Adaptive Huffman
- *
- * Author: Djuned Fernando Djusdek
- *         5112.100.071
- *         Informatics - ITS
- * 
- * Version 1.1
- *
- * This code only use 2^8 code for symbol
- */
-
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -26,17 +14,14 @@ namespace vitter {
 	#define NUMBER 512
 	
 	typedef struct node{
-		unsigned char symbol; // symbol
-		int weight,           // weight
-		    number;           // number
-		node *parent,         // parent
-		     *left,           // left child
-		     *right;          // right child
+		unsigned char symbol; 
+		int weight,           
+		    number;           
+		node *parent,         
+		     *left,           
+		     *right;          
 	} node;
 	
-	/**
-	 * UPDATE
-	 */
 	
 	typedef std::pair<int, node*> my_pair;
 	
@@ -205,7 +190,6 @@ namespace vitter {
 		return;
 	}
 	
-	// Not use, just for check the binary tree
 	void print_tree(node **tree, int deep) {
 		if((*tree)->left != NULL) {
 			print_tree(&(*tree)->left, deep+1);
@@ -266,7 +250,6 @@ namespace vitter {
 				switch_node(temp->parent, l_r, inner_temp, l_r_sibling);
 			}
 				
-		// NYT
 		} else {
 			node *new_nyt;
 			create_node(&new_nyt, 0x00, true);
@@ -287,10 +270,8 @@ namespace vitter {
 				
 			}
 			
-			// goto old nyt
 			temp = old_nyt;
 			
-			// give number
 			queueing_node(&*tree, &queue, 0);
 			std::sort(queue.begin(), queue.end(), my_sort);
 			
@@ -305,14 +286,11 @@ namespace vitter {
 	
 		}
 		
-		// increment weight
 		increment_weight(&temp);
 		
 		while(temp->parent != NULL) {
-			// go to parent node
 			temp = temp->parent;
 			
-			// if not root
 			if (temp->parent != NULL)
 			{
 				node *inner_temp = NULL;
@@ -352,10 +330,7 @@ namespace vitter {
 		return;
 	}
 	
-	/**
-	 * ENCODE
-	 */
-	
+
 	void get_the_code(node **tree, unsigned char symbol, char *do_code, std::queue<char> *code_write) {
 		char temp[strlen(do_code)+1];
 		if ((*tree)->symbol == symbol && (*tree)->left == NULL && (*tree)->right == NULL && (*tree)->weight != 0) {
@@ -437,7 +412,6 @@ namespace vitter {
 	}
 	
 	void encode(node **tree, unsigned char symbol, unsigned char *dictionary, std::queue<char> *code_write, std::ofstream *file, node **nyt) {
-		// symbol exist
 		if (dictionary[(int) symbol] == 0x01) {
 			char do_code[1];
 			do_code[0] = '\0';
@@ -455,20 +429,15 @@ namespace vitter {
 			
 		}
 		
-		// call update procedure
 		update(&*tree, symbol, dictionary, &*nyt);
 		
-		// write to file
 		while ((*code_write).size() >= 8) {
 			write_to_file(&*file, &*code_write);
 		}
 		
 		return;
 	}
-	
-	/**
-	 * DECODE
-	 */
+
 	
 	bool read_from_file(std::ifstream *file, std::queue<char> *code_read) {
 		char temp;
@@ -521,7 +490,6 @@ namespace vitter {
 	}
 	
 	void decode(node **tree, unsigned char *dictionary, std::queue<char> *code_read, std::ifstream *file, std::ofstream *out_file, node **nyt, bool *oke, short offset) {
-		// 4 byte
 		while ((*code_read).size() < 32 && *oke) {
 			*oke = read_from_file(&*file, &*code_read);
 		}
@@ -533,7 +501,6 @@ namespace vitter {
 			get_char_from_code(&*code_read, symbol);
 			write_to_file_instansly(&*out_file, symbol[0]);
 			
-			// call update procedure
 			update(&*tree, symbol[0], dictionary, &*nyt);
 			
 		} else {
@@ -548,7 +515,6 @@ namespace vitter {
 					
 				}
 				
-				// 4 byte
 				while ((*code_read).size() < 32 && *oke) {
 					*oke = read_from_file(&*file, &*code_read);
 				}
@@ -564,13 +530,11 @@ namespace vitter {
 				get_char_from_code(&*code_read, symbol);
 				write_to_file_instansly(&*out_file, symbol[0]);
 				
-				// call update procedure
 				update(&*tree, symbol[0], dictionary, &*nyt);
 				
 			} else {
 				write_to_file_instansly(&*out_file, temp->symbol);
 				
-				// call update procedure
 				update(&*tree, temp->symbol, dictionary, &*nyt);
 				
 			}
@@ -592,9 +556,6 @@ namespace vitter {
 		}
 	}
 	
-	/**
-	 * COMPRESS
-	 */
 	
 	void compress(std::ifstream *in, std::ofstream *out) {
 		node *root = NULL;
@@ -608,14 +569,12 @@ namespace vitter {
 		
 		unsigned short offset = 0;
 		
-		// initiate file with offset
 		*out << (unsigned char) 0x00;
 		
 		while (read_from_file_instansly(&*in, symbol)) {
 			encode(&root, symbol[0], dictionary, &code_write, &*out, &nyt);
 		}
 		
-		// write to file for offset
 		if (code_write.size() > 0) {
 			offset = 8 - code_write.size();
 			
@@ -638,9 +597,7 @@ namespace vitter {
 		return;
 	}
 	
-	/**
-	 * DECOMPRESS
-	 */
+
 	
 	void decompress(std::ifstream *in, std::ofstream *out) {
 		node *root = NULL;
@@ -681,13 +638,10 @@ int main(int argc, char* argv[]) {
 		
 		std::ifstream in;
 		in.open(argv[2], std::ios::in | std::ios::binary);
-//		in.open("test.txt", std::ios::in | std::ios::binary);
 		
 		std::ofstream out;
 		char filename_out[strlen(argv[2]) + 9];
 		sscanf(argv[2], "%[^.]", filename_out);
-//		char filename_out[strlen("test.txt") + 9];
-//		sscanf("test.txt", "%[^.]", filename_out);
     	
     	if (strcmp(argv[1], "-c") == 0) {
     		cout << "H" << endl;
